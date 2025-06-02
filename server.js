@@ -6,7 +6,7 @@ const port = process.env.PORT || 3000
 app.use(async (req,res,next) => {
     try {
         const client = await connectToDB()
-        req.db = client.db('frutas')
+        req.db = client.db('frutas').collection('frutas')
         next()
     } catch {
         console.log('Error al conectarse a la DB');
@@ -19,7 +19,8 @@ app.get('/', (req, res) => {
 
 app.get('/frutas', async (req, res) => {
     try {
-        const frutas = await req.db.collection('frutas').find().toArray()
+        const {db} = req
+        const frutas = await db.find().toArray()
         res.json ({frutas})
     } catch {
         console.log('error al traer la collection de frutas');
@@ -30,8 +31,9 @@ app.get('/frutas', async (req, res) => {
 
 app.get('/frutas/:id', async (req, res) => {
     try {
+        const {db} = req
         const frutasId = parseInt(req.params.id) || 0
-        const fruta = await req.db.collection('frutas').findOne({id: frutasId})
+        const fruta = await db.findOne({id: frutasId})
         (fruta) ? res.json(fruta) 
         : res.status(404).json({error:'404 - fruta not found'})
     } catch {
